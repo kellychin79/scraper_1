@@ -16,7 +16,6 @@ smtp_server ='smtp.gmail.com'
 sender_email = 'XXX@gmail.com'
 password = 'APP PASSWORD' # app password generated through Google Account > Security > App passwords > Other 
 mailingList = ['YYY@gmail.com', "ZZZ@gmail.com"]
-subject = today.strftime("%m/%d/%Y") +' - 3D Printer Pricing'
 
 for i in range(0, len(mailingList)):
     receiver_email = mailingList[i]
@@ -45,11 +44,20 @@ for i in range(0, len(mailingList)):
     # Open the file
     with open(filename, "r") as f:
         raw_data = f.readlines()
-        data = [i.split(',') for i in raw_data]
+        data = []
+        for i in raw_data: 
+            if '300*300*300mm,Dragon High Flow,United States,$899.00' in i:
+                d = (i+', **Your Target').split(',')
+                data.append(d)
+                target_price = d[3]
+            else:
+                data.append((i+', ').split(','))
 
     text = text.format(table=tabulate(data, headers="firstrow", tablefmt="grid"))
     html = html.format(table=tabulate(data, headers="firstrow", tablefmt="html"))
     
+    subject = today.strftime("%m/%d/%Y") +' - 300mm Dragon High Flow from US' + target_price
+
     # Create a multipart message and set headers
     msg = MIMEMultipart("alternative", None, [MIMEText(text), MIMEText(html,'html')])
     msg['From'] = sender_email
